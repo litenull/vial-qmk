@@ -72,8 +72,6 @@ uint8_t r_temp, g_temp, b_temp;
 extern bool f_bat_hold;
 extern DEV_INFO_STRUCT dev_info;
 extern user_config_t user_config;
-extern uint8_t rf_blink_cnt;
-extern uint16_t rf_link_show_time;
 
 /**
  * @brief suspend_power_down_kb
@@ -524,55 +522,6 @@ static void side_off_mode_show(void)
 #define RF_LED_LINK_PERIOD 500
 #define RF_LED_PAIR_PERIOD 250
 
-void rf_led_show(void)
-{
-    static uint32_t rf_blink_timer = 0;
-    uint16_t rf_blink_priod        = 0;
-
-    if (dev_info.link_mode == LINK_RF_24)
-    {
-        r_temp = colour_lib[3][0];
-        g_temp = colour_lib[3][1];
-        b_temp = colour_lib[3][2];
-    } else if (dev_info.link_mode == LINK_USB) {
-        r_temp = colour_lib[2][0];
-        g_temp = colour_lib[2][1];
-        b_temp = colour_lib[2][2];
-    } else
-    {
-        r_temp = colour_lib[5][0];
-        g_temp = colour_lib[5][1];
-        b_temp = colour_lib[5][2];
-    }
-
-    if (rf_blink_cnt)
-    {
-        if (dev_info.rf_state == RF_PAIRING)
-            rf_blink_priod = RF_LED_PAIR_PERIOD;
-        else
-            rf_blink_priod = RF_LED_LINK_PERIOD;
-
-        if (timer_elapsed32(rf_blink_timer) < (rf_blink_priod >> 1)) {
-        } else {
-            r_temp = 0x00;
-            g_temp = 0x00;
-            b_temp = 0x00;
-        }
-
-        if (timer_elapsed32(rf_blink_timer) >= rf_blink_priod) {
-            rf_blink_cnt--;
-            rf_blink_timer = timer_read32();
-        }
-    } else if (rf_link_show_time < RF_LINK_SHOW_TIME) {
-    } else {
-        rf_blink_timer = timer_read32();
-        return;
-    }
-
-    set_left_rgb(r_temp, g_temp, b_temp);
-}
-
-
 /**
  * @brief  bat_num_led.
  */
@@ -852,5 +801,5 @@ void m_side_led_show(void)
     sys_sw_led_show();
 
     sys_led_show();
-    rf_led_show();
+    // rf_led_show();  // RF disabled
 }
